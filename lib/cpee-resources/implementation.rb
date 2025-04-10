@@ -24,6 +24,25 @@ module CPEE
 
     SERVER = File.expand_path(File.join(__dir__,'implementation.xml'))
 
+    class DoSaveFile < Riddl::Implementation
+      def response
+        data = @a[1]
+        file = File.join(data,@a[0],*(@r[@a[2]].map{|e| Riddl::Protocols::Utils::escape(e)}))
+
+        File.write(file, data)
+
+        # Return success response
+        return Riddl::Parameter::Complex.new(
+          'save_success',
+          'text/plain',
+          "File saved successfully at: #{file_path}"
+        )
+      end
+    end
+
+
+
+
     class DoExists < Riddl::Implementation #{{{
       def response
         data = @a[1]
@@ -120,12 +139,18 @@ module CPEE
               run DoExists, 'endpoints', opts[:data_dir] if get
               on resource 'symbol.svg' do
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'svg', 'image/svg+xml'  if get
+                run CreateEntry, 'endpoints', opts[:data_dir], (-2..-1), 'svg', 'image/svg+xml' if post
+                run DoSaveFile, 'endpoints', opts[:data_dir], (-2..-1), 'svg', 'image/svg+xml' if put or post
               end
               on resource 'schema.rng' do
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'rng', 'text/xml' if get
+                run CreateEntry, 'endpoints', opts[:data_dir], (-2..-1), 'rng', 'text/xml' if post
+                run DoSaveFile, 'endpoints', opts[:data_dir], (-2..-1), 'rng', 'text/xml' if put or post
               end
               on resource 'properties.json' do
                 run DoFile, 'endpoints', opts[:data_dir], (-2..-1), 'json', 'application/json' if get
+                run CreateEntry, 'endpoints', opts[:data_dir], (-2..-1), 'json', 'application/json' if post
+                run DoSaveFile, 'endpoints', opts[:data_dir], (-2..-1), 'json', 'application/json' if put
               end
             end
           end
