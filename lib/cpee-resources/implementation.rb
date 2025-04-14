@@ -40,7 +40,12 @@ module CPEE
       end
     end
 
-
+    class CreateEntry < Riddl::Implementation
+      def response
+        folder_name = @a[-2]
+        FileUtils.mkdir(folder_name)
+      end
+    end
 
 
     class DoExists < Riddl::Implementation #{{{
